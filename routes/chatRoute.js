@@ -1,24 +1,36 @@
 const express = require("express");
 const ChatModel = require("../models/chatModel.js");
+const doctorAccountModel = require("../models/doctorAccountModel.js");
 const userModel = require("../models/userModel.js");
 
 const router = express.Router();
 
 router.post("/", async (req, res) => {
-  const newChat = new ChatModel({
-    members: [req.body.senderId, req.body.receiverId],
+  const { senderId, receiverId } = req.body;
+  const chatExists = await ChatModel.findOne({
+    members: [senderId, receiverId],
   });
+  if (chatExists) {
+    return res
+      .status(200)
+      .send({ message: "chat already exists", success: false });
+  }
+  const newChat = new ChatModel({
+    members: [senderId, receiverId],
+  });
+  console.log("bads", { ...req.body });
   // const userExists = await userModel.findOne({ name: req.body.name });
   // console.log(userExists.name);
   // console.log("One", newChat.members[1]);
   // if (userExists.name === newChat.members[1]) {
 
+  console.log("chat", chatExists);
   try {
-    if (newChat) {
-      return res
-        .status(200)
-        .send({ message: "chat already exists", success: false });
-    }
+    // if (newChat) {
+    //   return res
+    //     .status(200)
+    //     .send({ message: "chat already exists", success: false });
+    // }
     const result = await newChat.save();
     res.status(200).send({
       message: "messsage created successfully",
@@ -62,7 +74,8 @@ router.get("/get/:id", async (req, res) => {
   const id = req.params.id;
 
   try {
-    const user = await userModel.findById(id);
+    const user =
+      (await userModel.findById(id)) || (await doctorAccountModel.findById(id));
 
     if (user) {
       const { password, ...otherDetails } = user._doc;

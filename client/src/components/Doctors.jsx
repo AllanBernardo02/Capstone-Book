@@ -10,11 +10,11 @@ const Doctors = ({ doctor }) => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.user);
 
-  const chatDoctor = (doctorId) => {
+  const chatDoctor = (Id) => {
     try {
       axios.post("/api/chat/", {
         senderId: user._id,
-        receiverId: doctorId,
+        receiverId: Id,
       });
       navigate(`/chat`);
     } catch (error) {}
